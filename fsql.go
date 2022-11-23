@@ -84,10 +84,13 @@ func Query(db query, sql string, params ...any) (*sql.Rows, error) {
 
 func QueryContext(ctx context.Context, db queryContext, sql string, params ...any) (*sql.Rows, error) {
 	r, err := db.QueryContext(ctx, sql, params...)
-	return r, fault.Wrap(err,
-		fctx.With(ctx),
-		With(sql, params...),
-	)
+	if err != nil {
+		err = fault.Wrap(err,
+			fctx.With(ctx),
+			With(sql, params...),
+		)
+	}
+	return r, err
 }
 
 func QueryRow(db queryRow, sql string, params ...any) (*sql.Row, error) {
