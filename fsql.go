@@ -1,15 +1,21 @@
 package fsql
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fctx"
 )
 
 type db interface {
 	Exec(string, ...any) (sql.Result, error)
 	Query(string, ...any) (*sql.Rows, error)
+	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
 	QueryRow(string, ...any) *sql.Row
+	QueryRowContext(context.Context, string, ...any) *sql.Row
 }
 
 type withSql struct {
@@ -64,7 +70,27 @@ func Query(db db, sql string, params ...any) (*sql.Rows, error) {
 	return r, Wrap(err, sql, params...)
 }
 
+func QueryContext(ctx context.Context, db db, sql string, params ...any) (*sql.Rows, error) {
+	r, err := db.QueryContext(ctx, sql, params...)
+	return r, fault.Wrap(err,
+		fctx.With(ctx),
+		With(sql, params...),
+	)
+}
+
 func QueryRow(db db, sql string, params ...any) (*sql.Row, error) {
 	r := db.QueryRow(sql, params...)
 	return r, Wrap(r.Err(), sql, params...)
+}
+
+func QueryRowContext(ctx context.Context, db db, sql string, params ...any) (*sql.Row, error) {
+	r := db.QueryRowContext(ctx, sql, params...)
+	err := r.Err()
+	if err != nil {
+		err = fault.Wrap(err,
+			fctx.With(ctx),
+			With(sql, params...),
+		)
+	}
+	return r, err
 }
