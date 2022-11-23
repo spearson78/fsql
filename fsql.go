@@ -10,11 +10,23 @@ import (
 	"github.com/Southclaws/fault/fctx"
 )
 
-type db interface {
+type exec interface {
 	Exec(string, ...any) (sql.Result, error)
+}
+
+type query interface {
 	Query(string, ...any) (*sql.Rows, error)
+}
+
+type queryContext interface {
 	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
+}
+
+type queryRow interface {
 	QueryRow(string, ...any) *sql.Row
+}
+
+type queryRowContext interface {
 	QueryRowContext(context.Context, string, ...any) *sql.Row
 }
 
@@ -60,17 +72,17 @@ func Get(err error) (string, interface{}, bool) {
 	return "", nil, false
 }
 
-func Exec(db db, sql string, params ...any) (sql.Result, error) {
+func Exec(db exec, sql string, params ...any) (sql.Result, error) {
 	r, err := db.Exec(sql, params...)
 	return r, Wrap(err, sql, params...)
 }
 
-func Query(db db, sql string, params ...any) (*sql.Rows, error) {
+func Query(db query, sql string, params ...any) (*sql.Rows, error) {
 	r, err := db.Query(sql, params...)
 	return r, Wrap(err, sql, params...)
 }
 
-func QueryContext(ctx context.Context, db db, sql string, params ...any) (*sql.Rows, error) {
+func QueryContext(ctx context.Context, db queryContext, sql string, params ...any) (*sql.Rows, error) {
 	r, err := db.QueryContext(ctx, sql, params...)
 	return r, fault.Wrap(err,
 		fctx.With(ctx),
@@ -78,12 +90,12 @@ func QueryContext(ctx context.Context, db db, sql string, params ...any) (*sql.R
 	)
 }
 
-func QueryRow(db db, sql string, params ...any) (*sql.Row, error) {
+func QueryRow(db queryRow, sql string, params ...any) (*sql.Row, error) {
 	r := db.QueryRow(sql, params...)
 	return r, Wrap(r.Err(), sql, params...)
 }
 
-func QueryRowContext(ctx context.Context, db db, sql string, params ...any) (*sql.Row, error) {
+func QueryRowContext(ctx context.Context, db queryRowContext, sql string, params ...any) (*sql.Row, error) {
 	r := db.QueryRowContext(ctx, sql, params...)
 	err := r.Err()
 	if err != nil {
