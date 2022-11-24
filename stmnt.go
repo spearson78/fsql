@@ -6,6 +6,7 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fctx"
+	"github.com/Southclaws/fault/floc"
 )
 
 type fsqlStmt struct {
@@ -21,7 +22,7 @@ func (m *fsqlStmt) Close() error {
 func (m *fsqlStmt) QueryContext(ctx context.Context, args ...any) (*sql.Rows, error) {
 	rows, err := m.stmt.QueryContext(ctx, args...)
 	if err != nil {
-		err = fault.Wrap(err, With(m.sql, args...), fctx.With(ctx))
+		err = fault.Wrap(err, With(m.sql, args...), fctx.With(ctx), floc.WithDepth(1))
 	}
 	return rows, err
 }
@@ -30,7 +31,7 @@ func (m *fsqlStmt) QueryContext(ctx context.Context, args ...any) (*sql.Rows, er
 func (m *fsqlStmt) Query(args ...any) (*sql.Rows, error) {
 	rows, err := m.stmt.Query(args...)
 	if err != nil {
-		err = fault.Wrap(err, With(m.sql, args...))
+		err = fault.Wrap(err, With(m.sql, args...), floc.WithDepth(1))
 	}
 	return rows, err
 
@@ -42,7 +43,7 @@ func (m *fsqlStmt) QueryRowContext(ctx context.Context, args ...any) (*sql.Row, 
 	err := row.Err()
 	if err != nil {
 		row.Scan()
-		err = fault.Wrap(err, With(m.sql, args...), fctx.With(ctx))
+		err = fault.Wrap(err, With(m.sql, args...), fctx.With(ctx), floc.WithDepth(1))
 	}
 	return row, err
 }
@@ -53,7 +54,7 @@ func (m *fsqlStmt) QueryRow(args ...any) (*sql.Row, error) {
 	err := row.Err()
 	if err != nil {
 		row.Scan()
-		err = fault.Wrap(err, With(m.sql, args...))
+		err = fault.Wrap(err, With(m.sql, args...), floc.WithDepth(1))
 	}
 	return row, err
 }
@@ -69,7 +70,7 @@ type prepare interface {
 func PrepareContext(ctx context.Context, db prepare, query string) (*fsqlStmt, error) {
 	stmt, err := db.PrepareContext(ctx, query)
 	if err != nil {
-		return nil, fault.Wrap(err, With(query), fctx.With(ctx))
+		return nil, fault.Wrap(err, With(query), fctx.With(ctx), floc.WithDepth(1))
 	}
 
 	return &fsqlStmt{
@@ -82,7 +83,7 @@ func PrepareContext(ctx context.Context, db prepare, query string) (*fsqlStmt, e
 func Prepare[E any](db prepare, query string) (*fsqlStmt, error) {
 	stmt, err := db.Prepare(query)
 	if err != nil {
-		return nil, fault.Wrap(err, With(query))
+		return nil, fault.Wrap(err, With(query), floc.WithDepth(1))
 	}
 
 	return &fsqlStmt{

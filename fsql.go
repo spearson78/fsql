@@ -8,6 +8,7 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fctx"
+	"github.com/Southclaws/fault/floc"
 )
 
 type exec interface {
@@ -75,20 +76,20 @@ func Get(err error) (string, interface{}, bool) {
 func Exec(db exec, sql string, params ...any) (sql.Result, error) {
 	r, err := db.Exec(sql, params...)
 	if err != nil {
-		err = fault.Wrap(err, With(sql, params...))
+		err = fault.Wrap(err, With(sql, params...), floc.WithDepth(1))
 	}
 	return r, err
 }
 
 func Query(db query, sql string, params ...any) (*sql.Rows, error) {
 	r, err := db.Query(sql, params...)
-	return r, Wrap(err, sql, params...)
+	return r, fault.Wrap(err, With(sql, params...), floc.WithDepth(1))
 }
 
 func QueryContext(ctx context.Context, db queryContext, sql string, params ...any) (*sql.Rows, error) {
 	r, err := db.QueryContext(ctx, sql, params...)
 	if err != nil {
-		err = fault.Wrap(err, fctx.With(ctx), With(sql, params...))
+		err = fault.Wrap(err, fctx.With(ctx), With(sql, params...), floc.WithDepth(1))
 	}
 	return r, err
 }
@@ -98,7 +99,7 @@ func QueryRow(db queryRow, sql string, params ...any) (*sql.Row, error) {
 	err := r.Err()
 	if err != nil {
 		r.Scan()
-		err = fault.Wrap(err, With(sql, params...))
+		err = fault.Wrap(err, With(sql, params...), floc.WithDepth(1))
 	}
 	return r, err
 }
@@ -108,7 +109,7 @@ func QueryRowContext(ctx context.Context, db queryRowContext, sql string, params
 	err := r.Err()
 	if err != nil {
 		r.Scan()
-		err = fault.Wrap(err, fctx.With(ctx), With(sql, params...))
+		err = fault.Wrap(err, fctx.With(ctx), With(sql, params...), floc.WithDepth(1))
 	}
 	return r, err
 }
