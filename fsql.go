@@ -74,7 +74,10 @@ func Get(err error) (string, interface{}, bool) {
 
 func Exec(db exec, sql string, params ...any) (sql.Result, error) {
 	r, err := db.Exec(sql, params...)
-	return r, Wrap(err, sql, params...)
+	if err != nil {
+		err = fault.Wrap(err, With(sql, params...))
+	}
+	return r, err
 }
 
 func Query(db query, sql string, params ...any) (*sql.Rows, error) {
@@ -85,27 +88,27 @@ func Query(db query, sql string, params ...any) (*sql.Rows, error) {
 func QueryContext(ctx context.Context, db queryContext, sql string, params ...any) (*sql.Rows, error) {
 	r, err := db.QueryContext(ctx, sql, params...)
 	if err != nil {
-		err = fault.Wrap(err,
-			fctx.With(ctx),
-			With(sql, params...),
-		)
+		err = fault.Wrap(err, fctx.With(ctx), With(sql, params...))
 	}
 	return r, err
 }
 
 func QueryRow(db queryRow, sql string, params ...any) (*sql.Row, error) {
 	r := db.QueryRow(sql, params...)
-	return r, Wrap(r.Err(), sql, params...)
+	err := r.Err()
+	if err != nil {
+		r.Scan()
+		err = fault.Wrap(err, With(sql, params...))
+	}
+	return r, err
 }
 
 func QueryRowContext(ctx context.Context, db queryRowContext, sql string, params ...any) (*sql.Row, error) {
 	r := db.QueryRowContext(ctx, sql, params...)
 	err := r.Err()
 	if err != nil {
-		err = fault.Wrap(err,
-			fctx.With(ctx),
-			With(sql, params...),
-		)
+		r.Scan()
+		err = fault.Wrap(err, fctx.With(ctx), With(sql, params...))
 	}
 	return r, err
 }
