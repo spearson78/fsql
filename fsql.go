@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Southclaws/fault"
-	"github.com/Southclaws/fault/fctx"
-	"github.com/Southclaws/fault/floc"
+	"github.com/spearson78/fault"
+	"github.com/spearson78/fault/fctx"
+	"github.com/spearson78/fault/floc"
 )
 
 type exec interface {

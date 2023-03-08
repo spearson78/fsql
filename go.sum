@@ -1,4 +1,2 @@
-github.com/Southclaws/fault v0.4.3 h1:T6NaT0XAHqVE+s/42sg0WP2sm1iEYm5CveFC/TJn5O8=
-github.com/Southclaws/fault v0.4.3/go.mod h1:ykAz97glbxwopwRqAPfQMy8/Y4O+s3c6YtXwaSbxnEg=
-github.com/spearson78/fault v0.4.3-floc h1:9b4C2CJohDdP+PbZrLnWVm+4Cg3LMGNVcv7FL2CaqaU=
-github.com/spearson78/fault v0.4.3-floc/go.mod h1:ykAz97glbxwopwRqAPfQMy8/Y4O+s3c6YtXwaSbxnEg=
+github.com/spearson78/fault v0.4.4-floc h1:okWJwfrMbH5UglLDwQkkyeOESULEqxJVcDTizskU2LE=
+github.com/spearson78/fault v0.4.4-floc/go.mod h1:+jQardX+c7/re7zDsIgRWs3RGulfo4J+ztavTJpSdDo=
